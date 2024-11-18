@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
-// Importing route files
 const adminRoutes = require('./routes/adminRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -29,7 +28,6 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(cors({
   origin: function(origin, callback) {
     const allowedOrigins = ['http://localhost:5173', 'http://192.168.98.20:5173'];
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -40,9 +38,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Increase maximum age to 10 minutes
+  maxAge: 600 
 }));
-// Add this middleware before your routes
 app.use((req, res, next) => {
   console.log('Incoming request:', {
     method: req.method,
@@ -52,10 +49,9 @@ app.use((req, res, next) => {
   });
   next();
 });
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100 
 });
 app.use(limiter);
 
@@ -70,11 +66,9 @@ app.use(cookieParser());
 // });
 // Routes
 app.use('/api/admin', adminRoutes);
-// Uncomment this line when you are ready to use bookRoutes
 app.use('/api/books', bookRoutes);
 app.use('/api/orders', orderRoutes);
 
-// Database connection and server start
 const sequelize = require('./config/db');
 
 const startServer = async () => {
@@ -82,12 +76,8 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
 
-    // Sync database (in development)
     if (process.env.NODE_ENV === 'development') {
-      // Option 1: Use alter (modifies the schema, no data loss)
       await sequelize.sync({ alter: true });
-      // Option 2: (For complete reset) Use force (will drop and recreate tables)
-      // await sequelize.sync({ force: true });
       console.log('Database synced');
     }
 
