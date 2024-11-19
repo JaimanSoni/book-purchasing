@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import { useAuth } from '../../Context/AuthContext'
+import { useNavigate } from "react-router-dom";
+
 
 const TotalComponents = () => {
     return (
@@ -14,9 +17,17 @@ const TotalComponents = () => {
 }
 
 export default function AdminHome() {
+    const {logout} = useAuth()
+    const navigate = useNavigate();
+
     const [currentPage, setCurrentPage] = useState("Books")
     const changePage = () => {
         setCurrentPage(currentPage == "Books" ? "Orders" : "Books")
+    }
+
+    const handleLogout = () => {
+        logout()
+        navigate("/admin/login")
     }
     const Books = [
         { id: 1, title: 'John Doe', author: "Jaiman Soni", price: "$90", stock: 20 },

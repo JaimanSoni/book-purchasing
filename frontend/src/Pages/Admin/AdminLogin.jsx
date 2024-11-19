@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useAuth } from "../../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
 
+    const { loginAsAdmin } = useAuth();
+    const navigate = useNavigate();
+    
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
@@ -13,6 +18,11 @@ export default function AdminLogin() {
             setShowPassword(true)
         }
     }
+
+    const handleLogin = () => {
+        loginAsAdmin();
+        navigate("/admin/dashboard");
+    };
 
     return (
         <div className='bg-slate-200 min-h-screen h-fit flex justify-center items-center' >
