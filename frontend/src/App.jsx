@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import CartPage from './Pages/CartPage';
 import BookStore from './Pages/UserPage';
 import { toast } from 'react-hot-toast';
+import AdminHome from './Pages/Admin/AdminHome';
+import AdminLogin from './Pages/Admin/AdminLogin';
+import AddNewBook from './Pages/Admin/AddNewBook';
+import AdminError from './Pages/Admin/AccessDenied';
+import AdminSignup from "./Pages/Admin/AdminSignup"
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -40,18 +47,54 @@ const App = () => {
   };
 
   return (
-    <div>
-      <BookStore
-        cart={cart}
-        addToCart={addToCart}
-        removeFromCart={removeFromCart}
-      />
-      <CartPage
-        cart={cart}
-        removeFromCart={removeFromCart}
-        clearCart={clearCart}
-      />
-    </div>
+    // <div>
+    //   <BookStore
+    //     cart={cart}
+    //     addToCart={addToCart}
+    //     removeFromCart={removeFromCart}
+    //   />
+    //   <CartPage
+    //     cart={cart}
+    //     removeFromCart={removeFromCart}
+    //     clearCart={clearCart}
+    //   />
+    // </div>
+
+    <>
+      <Router>
+        <Routes>
+          {/* User Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin/login" element={<Login />} />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/create-user"
+            element={
+              <ProtectedRoute>
+                <AdminSignup />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+
+
+      <AdminHome />
+      <AdminLogin />
+      <AddNewBook />
+      <AdminError />
+    </>
   );
 };
 
