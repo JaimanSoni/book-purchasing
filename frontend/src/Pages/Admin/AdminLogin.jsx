@@ -30,7 +30,7 @@ export default function AdminLogin() {
                 <h1 className=' text-[28px] sm:text-[33px] font-medium text-center text-[#434343]'>
                     Admin Login
                 </h1>
-                <form action="" className='flex flex-col justify-center items-center gap-[30px] mt-[30px]'>
+                <form action="" className='flex flex-col justify-center items-center gap-[30px] mt-[30px]' onSubmit={handleLogin}>
                     <input required type="text" name='username' value={username} onChange={(e) => setUsername(e.target.value)} className='focus:outline-none focus:border-b-[2px] w-full h-[30px] px-[5px] text-[#717171] ' placeholder='Enter Email' />
                     <div className='w-full flex items-center'>
                         <input required type={showPassword ? "text" : "password"} name="password" value={password} onChange={(e) => setPassword(e.target.value)} className='focus:outline-none focus:border-b-[2px] w-full h-[30px] px-[5px] text-[#717171] ' placeholder='Enter Password' />

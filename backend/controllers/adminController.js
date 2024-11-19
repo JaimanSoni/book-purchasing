@@ -72,14 +72,58 @@ const adminController = {
     res.json({ message: 'Logout successful' });
   },
   
+  // async getAllOrders(req, res) {
+  //   try {      
+  //     const orders = await Order.findAll({
+  //       include: [
+  //         {
+  //           model: User,
+  //           attributes: ['username', 'enrollment_number'],
+  //         },
+  //         {
+  //           model: OrderItem,
+  //           include: {
+  //             model: Book,
+  //             attributes: ['title'],
+  //           },
+  //         },
+  //       ],
+  //       attributes: {
+  //         include: ['ordered_at']
+  //       },
+  //     });
+      
+  //     const orderDetails = orders.map(order => {
+  //       const user = order.User;
+  //       const items = order.OrderItems;
+
+  //       return {
+  //         order_id: order.order_id,
+  //         total_price: order.total_price,
+  //         name: user.username,
+          
+  //         enrollment_number: user.enrollment_number,
+  //         items: items.map(item => ({
+  //           book_title: item.Book.title,
+  //           quantity: item.quantity,
+  //           price_per_item: item.price,
+  //         })),
+  //       };
+  //     });
+
+  //     res.status(200).json({ orders: orderDetails });
+  //   } catch (err) {
+  //     console.error('Error fetching orders:', err);
+  //     res.status(500).json({ message: 'Server error while fetching orders' });
+  //   }
+  // },
   async getAllOrders(req, res) {
     try {
-
       const orders = await Order.findAll({
         include: [
           {
             model: User,
-            attributes: ['name', 'enrollment_number'],
+            attributes: ['username', 'enrollment_number'],
           },
           {
             model: OrderItem,
@@ -89,17 +133,26 @@ const adminController = {
             },
           },
         ],
+        attributes: ['order_id', 'total_price', 'ordered_at'],
+        order: [['ordered_at', 'DESC']]
       });
-
+  
       const orderDetails = orders.map(order => {
         const user = order.User;
         const items = order.OrderItems;
-
+  
+        // Simple date formatting
+        const orderedDate = order.ordered_at ? new Date(order.ordered_at) : null;
+        const formattedDate = orderedDate ? 
+          `${orderedDate.getDate()}/${orderedDate.getMonth() + 1}/${orderedDate.getFullYear()} ${String(orderedDate.getHours()).padStart(2, '0')}:${String(orderedDate.getMinutes()).padStart(2, '0')}` 
+          : 'N/A';
+  
         return {
           order_id: order.order_id,
           total_price: order.total_price,
-          name: user.name,
+          name: user.username,
           enrollment_number: user.enrollment_number,
+          ordered_at: formattedDate,
           items: items.map(item => ({
             book_title: item.Book.title,
             quantity: item.quantity,
@@ -107,13 +160,21 @@ const adminController = {
           })),
         };
       });
-
-      res.status(200).json({ orders: orderDetails });
-    } catch (err) {
-      console.error('Error fetching orders:', err);
-      res.status(500).json({ message: 'Server error while fetching orders' });
+  
+      res.status(200).json({
+        success: true,
+        orders: orderDetails
+      });
+  
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch orders',
+        error: error.message
+      });
     }
-  },
+  }
 };
 
 

@@ -20,6 +20,7 @@ const app = express();
 //   allowedHeaders: ['Content-Type', 'Authorization']
 // }));
 
+
 // Update your CORS configuration in server.js
 app.use(helmet());
 // Add helmet configuration to allow cross-origin
@@ -40,31 +41,18 @@ app.use(cors({
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 600 
 }));
-app.use((req, res, next) => {
-  console.log('Incoming request:', {
-    method: req.method,
-    path: req.path,
-    origin: req.headers.origin,
-    headers: req.headers
-  });
-  next();
-});
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 100 
 });
 app.use(limiter);
 
-// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// app.use((req, res, next) => {
-//   console.log('Incoming Request Body:', req.body);
-//   next();
-// });
-// Routes
+
 app.use('/api/admin', adminRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/orders', orderRoutes);

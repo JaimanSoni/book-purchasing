@@ -47,10 +47,17 @@ User.init({
     defaultValue: DataTypes.NOW,
   },
 }, {
+
   sequelize,
   modelName: 'User',
   tableName: 'users',
   timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['email', 'enrollment_number']
+    }
+  ]
 });
 
 module.exports = User;

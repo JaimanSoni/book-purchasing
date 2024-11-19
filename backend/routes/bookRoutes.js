@@ -9,7 +9,8 @@ const upload = multer({ dest: 'uploads/' });
 router.post('/add-book', authenticate,upload.array('images'), 
 addBook
 );
-router.get('/all-books', authenticate, getBooks);
+// api/books/all-books
+router.get('/all-books', getBooks);
 
 router.put('/book/:id', authenticate, updateBook);
 

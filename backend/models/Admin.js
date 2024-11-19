@@ -28,6 +28,12 @@ const Admin = sequelize.define('Admin', {
 }, {
   tableName: 'admins',
   timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['email', 'username']
+    }
+  ]
 });
 
 module.exports = Admin;

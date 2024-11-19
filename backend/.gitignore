@@ -1,7 +1,2 @@
-# Create .gitignore file with common Node.js ignores
-echo "node_modules/
-.env
-uploads/*
-!uploads/.gitkeep
-*.log
-.DS_Store" > .gitignore
+/node_modules
+/.env

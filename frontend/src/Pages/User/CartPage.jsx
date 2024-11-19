@@ -51,7 +51,7 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
     const loadingToast = toast.loading("Placing your order...");
 
     try {
-      const response = await fetch("http://localhost:3000/api/orders/place-order", {
+      const response = await fetch("http://192.168.98.20:3000/api/orders/place-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
