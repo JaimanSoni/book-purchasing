@@ -49,7 +49,7 @@ export default function AdminSignup() {
     };
 
     try {
-        const response = await axiosInstance.post("http://localhost:3000/api/admin/register", data,
+        const response = await axiosInstance.post("/api/admin/register", data,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,

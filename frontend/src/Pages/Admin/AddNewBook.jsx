@@ -71,7 +71,7 @@ export default function AddNewBook() {
       const loadingToast = toast.loading("Uploading book details...");
 
       const response = await axiosInstance.post(
-        "http://localhost:3000/api/books/add-book",
+        "/api/books/add-book",
         formData,
         {
           headers: {

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
+
 
 const AuthContext = createContext();
 
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
 
   const setNewAccessToken = async () => {
-    const response = await axios.post(`http://localhost:3000/api/admin/refresh-token`, null, 
+    const response = await axiosInstance.post(`/api/admin/refresh-token`, null, 
       {
         withCredentials: true
       }

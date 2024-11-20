@@ -58,7 +58,7 @@ export default function AdminHome() {
     try {
       const loadingToast = toast.loading("Fetching books...");
       const response = await axiosInstance.get(
-        "http://localhost:3000/api/books/all-books"
+        "/api/books/all-books"
       );
       toast.dismiss(loadingToast);
 
@@ -75,7 +75,7 @@ export default function AdminHome() {
     try {
       const loadingToast = toast.loading("Fetching Admins...");
       const response = await axiosInstance.get(
-        "http://localhost:3000/api/admin/all-admin",
+        "/api/admin/all-admin",
 
         {
           headers: {
@@ -104,7 +104,7 @@ export default function AdminHome() {
 
     try {
         // Attempt to fetch orders
-        const response = await axiosInstance.get("http://localhost:3000/api/admin/orders", {
+        const response = await axiosInstance.get("/api/admin/orders", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
             },
@@ -127,7 +127,7 @@ export default function AdminHome() {
                 await setNewAccessToken();
 
                 // Retry fetching orders after refreshing token
-                const retryResponse = await axiosInstance.get("http://localhost:3000/api/admin/orders", {
+                const retryResponse = await axiosInstance.get("/api/admin/orders", {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
                     },
@@ -154,7 +154,7 @@ export default function AdminHome() {
 
 
   const handleLogout = async () => {
-    const response = await axiosInstance.get(`http://localhost:3000/api/admin/logout`, {
+    const response = await axiosInstance.get(`/api/admin/logout`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
       },
@@ -211,7 +211,7 @@ export default function AdminHome() {
     if (!confirmDelete) return;
     try {
       const loadingToast = toast.loading("Deleting book...");
-      await axiosInstance.delete(`http://localhost:3000/api/books/book/${id}`, {
+      await axiosInstance.delete(`/api/books/book/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
         },
@@ -268,7 +268,7 @@ export default function AdminHome() {
     if (!confirmDelete) return;
     try {
       const loadingToast = toast.loading("Deleting Admin...");
-      await axiosInstance.delete(`http://localhost:3000/api/admin/delete-admin/${id}`, {
+      await axiosInstance.delete(`/api/admin/delete-admin/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
         },
@@ -316,7 +316,7 @@ export default function AdminHome() {
         <div className="flex gap-[10px] sm:gap-[20px]">
           <a
             href="/admin/create-user"
-            className="text-white bg-black w-[80px] text-[14px] sm:w-[100px] h-[30px] sm:h-[35px] rounded-[5px] flex justify-center items-center"
+            className="text-white bg-black w-[95px] text-[14px] sm:w-[100px] h-[30px] sm:h-[35px] rounded-[5px] flex justify-center items-center"
           >
             Create Admin
           </a>

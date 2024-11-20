@@ -50,8 +50,6 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
     if (!validateForm()) return;
 
     setLoading(true);
-    const loadingToast = toast.loading("Placing your order...");
-
     try {
       const loadingToast = toast.loading("Placing your order...");
   

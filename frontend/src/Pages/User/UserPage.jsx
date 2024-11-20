@@ -11,7 +11,7 @@ const BookStore = ({ cart, addToCart, removeFromCart }) => {
     const loadingToast = toast.loading("Fetching books...");
     try {
       const response = await axiosInstance.get(
-        "http://localhost:3000/api/books/all-books"
+        "/api/books/all-books"
       );
 
       if (response.data.success) {

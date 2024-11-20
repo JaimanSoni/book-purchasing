@@ -27,7 +27,7 @@ export default function AdminLogin() {
         };
 
         try {
-            const response = await axiosInstance.post(`http://localhost:3000/api/admin/login`, data);
+            const response = await axiosInstance.post(`/api/admin/login`, data);
 
             if (response && response.data.success) {
                 // Success toast

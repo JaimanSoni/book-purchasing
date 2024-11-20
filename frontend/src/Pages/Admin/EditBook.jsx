@@ -24,7 +24,7 @@ export default function AddNewBook() {
     const loadingToast = toast.loading("Loading book details...");
     try {
       const response = await axiosInstance.get(
-        `http://localhost:3000/api/books/book/${id}`,
+        `/api/books/book/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
@@ -80,7 +80,7 @@ export default function AddNewBook() {
     try {
       // Send formData via POST or PUT
       const response = await axiosInstance.put(
-        `http://localhost:3000/api/books/update-book/${id}`,
+        `/api/books/update-book/${id}`,
         formData,
         {
           headers: {
@@ -197,7 +197,7 @@ export default function AddNewBook() {
             <div
               className={`relative shadow-md cursor-pointer flex justify-center items-center ${
                 posterImg
-                  ? "overflow-hidden w-[300px] h-[300px]"
+                  ? "overflow-hidden w-[260px] h-[300px]"
                   : "h-[300px] w-[300px]"
               } rounded-[10px] bg-slate-50`}
               onDragOver={handleDragOverPoster}
