@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import axios from "axios";
 import Loading2 from "../../Components/Loading"
+import axiosInstance from "../../../utils/axiosInstance";
 
 const BookStore = ({ cart, addToCart, removeFromCart }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,7 +10,7 @@ const BookStore = ({ cart, addToCart, removeFromCart }) => {
   const getBooks = async () => {
     const loadingToast = toast.loading("Fetching books...");
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         "http://localhost:3000/api/books/all-books"
       );
 

@@ -22,19 +22,20 @@ const adminController = {
         admin_id: admin.admin_id,
       };
 
-      // const { accessToken, refreshToken } = generateTokens(payload);
+
       const accessToken = createAccessToken({ payload});
       const refreshToken = createRefreshToken({ payload });
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        path: "/",
+        path: "/", 
+        secure: true, 
         sameSite: "None",
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.json({
+        success: true,
         message: 'Login successful',
         accessToken,
         admin: {
@@ -44,7 +45,7 @@ const adminController = {
         }
       });
     } catch (error) {
-      res.status(500).json({ message: 'Login failed', error: error.message });
+      res.status(500).json({ success: false, message: 'Login failed', error: error.message });
     }
   },
 
@@ -69,9 +70,26 @@ const adminController = {
   },
   
   async logout(req, res) {
-    res.clearCookie('refreshToken');
-    res.json({ message: 'Logout successful' });
+    try {
+      res.clearCookie('refreshtoken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Logout successful',
+      });
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to logout. Please try again later.',
+      });
+    }
   },
+  
   
   async getAllOrders(req, res) {
     try {
@@ -133,7 +151,9 @@ const adminController = {
   },
 
   async refreshAccessToken(req, res) {
+    console.log("Refresh token received:", req.cookies.refreshToken);
     const refreshtoken = req.cookies.refreshtoken;
+    
   
     if (!refreshtoken) {
       return res.status(401).json({ message: "No refresh token provided" });
@@ -145,23 +165,23 @@ const adminController = {
       (err, decoded) => {
         if (err) {
           if (err.name === "TokenExpiredError") {
-            return res.status(403).json({ message: "Refresh token expired, please log in again" });
+            return res.status(403).json({success:false ,  message: "Refresh token expired, please log in again" });
           }
-          return res.status(401).json({ message: "Invalid refresh token" });
+          return res.status(401).json({success:false , message: "Invalid refresh token" });
         }
   
         // If valid, create a new access token
         const accessToken = createAccessToken({ id: decoded.id });
-        res.status(200).json({ accessToken });
+        res.status(200).json({success:true ,  accessToken });
       }
     );
   },
   
   async getAllAdmin(req, res) {
     try {
-      // Fetch all admin records from the database
+     
       const admins = await Admin.findAll({
-        attributes: ['admin_id', 'username', 'email', 'created_at'], // Include only these fields
+        attributes: ['admin_id', 'username', 'email', 'created_at'], 
       });
 
       return res.status(200).json({
@@ -179,9 +199,8 @@ const adminController = {
   },
   async deleteAdmin(req, res) {
     try {
-      const { id } = req.params; // Extract admin ID from the URL parameters
+      const { id } = req.params; 
 
-      // Check if id is provided
       if (!id) {
         return res.status(400).json({
           success: false,
@@ -189,7 +208,6 @@ const adminController = {
         });
       }
 
-      // Find the admin by ID
       const admin = await Admin.findByPk(id);
 
       if (!admin) {
@@ -199,7 +217,6 @@ const adminController = {
         });
       }
 
-      // Delete the admin
       await admin.destroy();
 
       return res.status(200).json({

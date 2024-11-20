@@ -15,20 +15,20 @@ const storage = multer.diskStorage({
   const upload = multer({ storage });
 
 
-router.post('/add-book',upload.array('images'),  addBook);
+router.post('/add-book', authenticate ,upload.array('images'),  addBook);
 // api/books/all-books
 router.get('/all-books', getBooks);
 
-router.get('/book/:id' , getSingleBook);
+router.get('/book/:id', authenticate ,getSingleBook);
 
 // router.put('/book/:id', updateBook);
 
-router.delete('/book/:id', deleteBook);
+router.delete('/book/:id', authenticate ,  deleteBook);
 
-router.delete('/delete-photo/:id', deletePhoto);
+// router.delete('/delete-photo/:id', deletePhoto);
 
 // router.post('/add-photo/:id', upload.array('images'), addPhoto);
-router.put('/update-book/:id', upload.any(), updateBookWithPhoto);
+router.put('/update-book/:id', authenticate ,upload.any(), updateBookWithPhoto);
 
 
 module.exports = router;

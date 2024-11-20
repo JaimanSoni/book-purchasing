@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
-
-import axios from "axios";
+import axiosInstance from '../../../utils/axiosInstance'
 import { useNavigate } from "react-router-dom";
 
 export default function AddNewBook() {
@@ -71,16 +70,20 @@ export default function AddNewBook() {
     try {
       const loadingToast = toast.loading("Uploading book details...");
 
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "http://localhost:3000/api/books/add-book",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
           },
         }
       );
-
+      if(response.status == 401){
+        logout();
+        navigate("/admin/login")
+      }
       toast.dismiss(loadingToast);
 
       if (response.data.success) {

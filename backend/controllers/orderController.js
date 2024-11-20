@@ -1,7 +1,6 @@
 const { sequelize, User, Order, OrderItem, Book } = require('../models');
 const { sendConfirmationEmail } = require('../utils/emailService');
 
-// Controller to place an order
 const placeOrder = async (req, res) => {
   const transaction = await sequelize.transaction(); 
   let transactionActive = true;
@@ -50,7 +49,7 @@ let orderDetailsHTML = `
 
 for (const item of items) {
   const book = await Book.findByPk(item.book_id); 
-  orderDetailsHTML += `<p>${book.title} (x${item.quantity}) - ₹${item.price.toFixed(2)} each</p>`;
+  orderDetailsHTML += `<p>${book.title} (x${item.quantity}) - ₹${item.price} each</p>`;
 }
 
 orderDetailsHTML += `<p>Thank you for your purchase!</p>`;

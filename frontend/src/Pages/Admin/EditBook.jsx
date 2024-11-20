@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import axiosInstance from "../../../utils/axiosInstance";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function AddNewBook() {
@@ -19,9 +20,18 @@ export default function AddNewBook() {
   const getBookDetails = async () => {
     const loadingToast = toast.loading("Loading book details...");
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/books/book/${id}`
+      const response = await axiosInstance.get(
+        `http://localhost:3000/api/books/book/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+          },
+        }
       );
+      if (response.status == 401) {
+        logout();
+        navigate("/admin/login");
+      }
       if (response.data.success) {
         setBookID(response.data.book.book_id);
         setTitle(response.data.book.title);
@@ -66,16 +76,21 @@ export default function AddNewBook() {
     const loadingToast = toast.loading("Updating book details...");
     try {
       // Send formData via POST or PUT
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `http://localhost:3000/api/books/update-book/${id}`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
           },
         }
       );
-
+      if(response.status == 401){
+        logout();
+        navigate("/admin/login")
+      }
       if (response.data.success) {
         toast.success("Book updated successfully!");
       } else {
@@ -138,11 +153,13 @@ export default function AddNewBook() {
       <div className="w-[80%] bg-white px-[20px] py-[25px] shadow-md h-fit min-h-[400px] rounded-[15px]">
         <Toaster position="top-center" />
         <div className="flex justify-between items-center">
-
-        <h1 className="text-[27px] font-medium">Add New Book</h1>
-        <a href="/admin/dashboard" className="w-[60px] h-[35px] bg-black flex justify-center items-center text-white rounded-[5px]">
-          Home
-        </a>
+          <h1 className="text-[27px] font-medium">Add New Book</h1>
+          <a
+            href="/admin/dashboard"
+            className="w-[60px] h-[35px] bg-black flex justify-center items-center text-white rounded-[5px]"
+          >
+            Home
+          </a>
         </div>
         <form
           className="flex flex-col gap-[30px] mt-[30px]"

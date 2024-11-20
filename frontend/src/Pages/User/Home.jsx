@@ -25,13 +25,13 @@ export default function Home() {
 
   const removeFromCart = (id) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === id);
+      const existingItem = prevCart.find((item) => item.book_id === id);
       if (existingItem?.quantity > 1) {
         return prevCart.map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+          item.book_id === id ? { ...item, quantity: item.quantity - 1 } : item
         );
       }
-      return prevCart.filter((item) => item.id !== id);
+      return prevCart.filter((item) => item.book_id !== id);
     });
   };
 

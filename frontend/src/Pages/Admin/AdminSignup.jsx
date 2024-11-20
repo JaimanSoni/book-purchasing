@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios"; // Assuming axios is already installed
 import { toast, Toaster } from "react-hot-toast";
+import axiosInstance from "../../../utils/axiosInstance";
 import {useNavigate} from "react-router-dom"
 
 export default function AdminSignup() {
@@ -49,8 +49,17 @@ export default function AdminSignup() {
     };
 
     try {
-        const response = await axios.post("http://localhost:3000/api/admin/register", data);
-
+        const response = await axiosInstance.post("http://localhost:3000/api/admin/register", data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+          },
+          }
+        );
+        if(response.status == 401){
+          logout();
+          navigate("/admin/login")
+        }
         if (response && response.data.success) {
             toast.success("Admin created successfully!");
             navigate("/admin/dashboard")

@@ -19,7 +19,6 @@ const addBook = async (req, res) => {
     if (req.files) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(file.path);
-        // console.log("Uploaded file URL:", result.secure_url);
         images.push({ url: result.secure_url, public_id: result.public_id });
       }
     }
@@ -50,13 +49,13 @@ const addBook = async (req, res) => {
 const getBooks = async (req, res) => {
   try {
     const books = await Book.findAll();
+    
 
-    // Process books to extract only the 'url' from 'image_url'
     const processedBooks = books.map(book => {
-      const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; // Parse JSON and extract the first URL
+      const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; 
       return {
-        ...book.toJSON(), // Convert Sequelize model instance to plain object
-        image_url: imageUrl, // Replace 'image_url' with the extracted URL
+        ...book.toJSON(), 
+        image_url: imageUrl, 
       };
     });
 
@@ -78,7 +77,6 @@ const getSingleBook = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find the book by its ID
     const book = await Book.findByPk(id);
 
     if (!book) {
@@ -88,11 +86,10 @@ const getSingleBook = async (req, res) => {
       });
     }
 
-    // Process the book to extract only the 'url' from 'image_url'
-    const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; // Parse JSON and extract the URL
+    const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; 
     const processedBook = {
       ...book.toJSON(),
-      image_url: imageUrl, // Replace 'image_url' with the extracted URL
+      image_url: imageUrl, 
     };
 
     return res.status(200).json({
@@ -109,39 +106,6 @@ const getSingleBook = async (req, res) => {
   }
 };
 
-// const updateBook = async (req, res) => {
-//   try {
-//     const { id } = req.params; 
-//     const { title, price, stock } = req.body;
-    
-
-//     const book = await Book.findByPk(id);
-//     if (!book) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Book not found",
-//       });
-//     }
-
-//     book.title = title || book.title;
-//     book.price = price || book.price;
-//     if (stock !== undefined) book.stock = stock; 
-
-//     await book.save();    
-//     return res.status(200).json({
-//       success: true,
-//       message: "Book updated successfully",
-//       book,
-//     });
-//   } catch (error) {
-//     console.error("Error in updateBook:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Error updating book",
-//       error: error.message,
-//     });
-//   }
-// };
 const deleteBook = async (req, res) => {
   try {
     const { id } = req.params; 
@@ -205,67 +169,11 @@ const deletePhoto = async (req, res) => {
     });
   }
 };
-// const addPhoto = async (req, res) => {
-//     try {
-//       const { id } = req.params;
-//       const book = await Book.findByPk(id);
-  
-//       if (!book) {
-//         return res.status(404).json({ message: "Book not found" });
-//       }
-  
-//       if (!req.files || req.files.length === 0) {
-//         return res.status(400).json({ message: "No image uploaded" });
-//       }
-  
-//       const file = req.files[0]; 
-//       console.log(file);
-      
-//       const uploadResponse = await cloudinary.uploader.upload(file.path, {
-//         folder: "books/",
-//         use_filename: true,
-//         unique_filename: true,
-//       });
-  
-//       const newImage = {
-//         url: uploadResponse.secure_url,
-//         public_id: uploadResponse.public_id,
-//       };
-  
-//       book.image_url = [newImage];
-  
-//       await book.update({
-//         image_url: book.image_url,
-//         updated_at: new Date()
-//       });
-  
-//       if (file.path) {
-//         fs.unlink(file.path, (err) => {
-//           if (err) console.error('Error deleting temporary file:', err);
-//         });
-//       }
-  
-//       return res.status(200).json({
-//         success: true,
-//         message: "Photo added successfully",
-//         image: newImage 
-//       });
-  
-//     } catch (error) {
-//       console.error("Error in addPhoto:", error);
-//       return res.status(500).json({
-//         success: false,
-//         message: "Error adding photo",
-//         error: error.message,
-//       });
-//     }
-// };
 const updateBookWithPhoto = async (req, res) => {
   try {
     const { id } = req.params; 
     const { title, price, stock } = req.body;
 
-    // Find the book by its ID
     const book = await Book.findByPk(id);
     if (!book) {
       return res.status(404).json({
@@ -274,16 +182,13 @@ const updateBookWithPhoto = async (req, res) => {
       });
     }
 
-    // Update book details if provided in the request body
     book.title = title || book.title;
     book.price = price || book.price;
     if (stock !== undefined) book.stock = stock;
 
-    // Handle photo upload if a file is provided
     if (req.files && req.files.length > 0) {
       const file = req.files[0];
 
-      // Upload the photo to Cloudinary
       const uploadResponse = await cloudinary.uploader.upload(file.path, {
         folder: "books/",
         use_filename: true,
@@ -295,10 +200,8 @@ const updateBookWithPhoto = async (req, res) => {
         public_id: uploadResponse.public_id,
       };
 
-      // Update the book's image URL field
       book.image_url = [newImage];
 
-      // Delete the temporary file
       if (file.path) {
         fs.unlink(file.path, (err) => {
           if (err) console.error("Error deleting temporary file:", err);
@@ -306,9 +209,8 @@ const updateBookWithPhoto = async (req, res) => {
       }
     }
 
-    // Save the updated book details
     await book.update({
-      image_url: book.image_url, // Only updates if photo was uploaded
+      image_url: book.image_url, 
       title: book.title,
       price: book.price,
       stock: book.stock,

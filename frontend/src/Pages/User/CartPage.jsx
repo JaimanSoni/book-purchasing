@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
+import axiosInstance from "../../../utils/axiosInstance"
 
 const CartPage = ({ cart, removeFromCart, clearCart }) => {
+  
   const [cartItems, setCartItems] = useState(cart);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,52 +53,58 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
     const loadingToast = toast.loading("Placing your order...");
 
     try {
-      const response = await fetch("http://192.168.98.20:3000/api/orders/place-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userData: {
-            username: formData.userName,
-            email: formData.email,
-            enrollment_number: formData.enrollmentId,
-            branch: formData.branch,
-            college: formData.college,
-            semester: formData.semester,
+      const loadingToast = toast.loading("Placing your order...");
+  
+      // Making the API request with axios
+      const response = await axiosInstance.post(
+          "/api/orders/place-order",
+          {
+              userData: {
+                  username: formData.userName,
+                  email: formData.email,
+                  enrollment_number: formData.enrollmentId,
+                  branch: formData.branch,
+                  college: formData.college,
+                  semester: formData.semester,
+              },
+              orderDetails: {
+                  total_price: total,
+              },
+              items: cartItems.map((item) => ({
+                  book_id: item.book_id,
+                  quantity: item.quantity,
+                  price: item.price,
+              })),
           },
-          orderDetails: {
-            total_price: total,
-          },
-          items: cartItems.map((item) => ({
-            book_id: item.book_id,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("Order placed successfully!", { id: loadingToast });
-        clearCart();
-        setFormData({
-          userName: "",
-          enrollmentId: "",
-          semester: "",
-          branch: "",
-          college: "",
-          email: "",
-        });
+          {
+              headers: { "Content-Type": "application/json" },
+          }
+      );
+  
+      // Handling the response
+      if (response.data.success) {
+          toast.success("Order placed successfully!", { id: loadingToast });
+          clearCart(); // Clear the cart after successful order placement
+          setFormData({
+              userName: "",
+              enrollmentId: "",
+              semester: "",
+              branch: "",
+              college: "",
+              email: "",
+          });
       } else {
-        throw new Error(data.message || "Failed to place order");
+          throw new Error(response.data.message || "Failed to place order");
       }
-    } catch (error) {
+  } catch (error) {
+      // Handling errors
       toast.error(error.message || "Failed to place order. Please try again.", {
-        id: loadingToast,
+          id: loadingToast,
       });
-    } finally {
-      setLoading(false);
-    }
+  } finally {
+      setLoading(false); // Ensure the loading state is updated
+  }
+  
   };
 
   // Check if all distinct books are selected at least once
@@ -135,11 +143,11 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
                   <td className="p-3 border-b">₹{item.price}</td>
                   <td className="p-3 border-b">{item.quantity}</td>
                   <td className="p-3 border-b">
-                    ₹{(item.price * item.quantity)}
+                    ₹{item.price * item.quantity}
                   </td>
                   <td className="p-3 border-b">
                     <button
-                      onClick={() => handleRemoveItem(item.id)}
+                      onClick={() => handleRemoveItem(item.book_id)}
                       className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
                       disabled={loading}
                     >
@@ -153,15 +161,11 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
         </div>
 
         <div className="text-right">
-          <p className="text-xl font-bold">
-            Subtotal: ₹{subtotal.toFixed(2)}
-          </p>
+          <p className="text-xl font-bold">Subtotal: ₹{subtotal.toFixed(2)}</p>
           {allItemsSelectedOnce && (
             <p className="text-green-600">Discount Applied: -₹{discount}</p>
           )}
-          <p className="text-2xl font-bold mt-2">
-            Total: ₹{total.toFixed(2)}
-          </p>
+          <p className="text-2xl font-bold mt-2">Total: ₹{total.toFixed(2)}</p>
         </div>
 
         <div className="mt-8">
@@ -200,7 +204,6 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
               >
                 {loading ? "Placing Order..." : "Place Order"}
               </button>
-             
             </div>
           </form>
         </div>

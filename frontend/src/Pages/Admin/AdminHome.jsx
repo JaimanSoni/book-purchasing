@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Loading2 from "../../Components/Loading";
 import FormatDateTime from "../../../utils/FormatDateTime";
 import { toast, Toaster } from "react-hot-toast"; // Importing Toaster and toast
+import axiosInstance from "../../../utils/axiosInstance";
 
 const TotalComponents = ({ title, count }) => {
   return (
@@ -40,7 +40,7 @@ const List = ({ id, title, price, stock, date, image }) => {
 };
 
 export default function AdminHome() {
-  const { logout } = useAuth();
+  const { logout, setNewAccessToken } = useAuth();
   const navigate = useNavigate();
 
   const [Books, setBooks] = useState(null);
@@ -57,7 +57,7 @@ export default function AdminHome() {
   const getAllBooks = async () => {
     try {
       const loadingToast = toast.loading("Fetching books...");
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         "http://localhost:3000/api/books/all-books"
       );
       toast.dismiss(loadingToast);
@@ -74,9 +74,19 @@ export default function AdminHome() {
   const getAllAdmins = async () => {
     try {
       const loadingToast = toast.loading("Fetching Admins...");
-      const response = await axios.get(
-        "http://localhost:3000/api/admin/all-admin"
+      const response = await axiosInstance.get(
+        "http://localhost:3000/api/admin/all-admin",
+
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+          },
+        }
       );
+      if (response.status == 401) {
+        logout();
+        navigate("/admin/login");
+      }
       toast.dismiss(loadingToast);
 
       if (response && response.data.success) {
@@ -90,24 +100,70 @@ export default function AdminHome() {
   };
 
   const getAllOrders = async () => {
+    const loadingToast = toast.loading("Fetching orders...");
+
     try {
-      const loadingToast = toast.loading("Fetching orders...");
-      const response = await axios.get(
-        "http://localhost:3000/api/admin/orders"
-      );
-      toast.dismiss(loadingToast);
+        // Attempt to fetch orders
+        const response = await axiosInstance.get("http://localhost:3000/api/admin/orders", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+            },
+        });
 
-      if (response && response.data.orders) {
-        setOrders(response.data.orders);
-        // toast.success("Orders fetched successfully!");
-      }
+        // If successful, update state and show success toast
+        if (response && response.data.orders) {
+            setOrders(response.data.orders);
+            // toast.success("Orders fetched successfully!");
+        }
     } catch (error) {
-      toast.error("Failed to fetch orders!");
-      console.error(error);
-    }
-  };
+        // Dismiss the loading toast
+        toast.dismiss(loadingToast);
 
-  const handleLogout = () => {
+        // Handle 401 errors (token expiration)
+        if (error.response && error.response.status === 401) {
+            try {
+                console.log("Access token expired. Attempting to refresh...");
+                // Call a function to refresh the token
+                await setNewAccessToken();
+
+                // Retry fetching orders after refreshing token
+                const retryResponse = await axiosInstance.get("http://localhost:3000/api/admin/orders", {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+                    },
+                });
+
+                if (retryResponse && retryResponse.data.orders) {
+                    setOrders(retryResponse.data.orders);
+                    // toast.success("Orders fetched successfully!");
+                }
+            } catch (refreshError) {
+                console.error("Failed to refresh token:", refreshError);
+                toast.error("Session expired. Please log in again.");
+                navigate("/admin/login"); // Redirect to login page
+            }
+        } else {
+            // Handle other errors
+            console.error("Error fetching orders:", error);
+            toast.error("Failed to fetch orders. Please try again.");
+        }
+    } finally {
+        toast.dismiss(loadingToast); // Ensure toast is dismissed in all cases
+    }
+};
+
+
+  const handleLogout = async () => {
+    const response = await axiosInstance.get(`http://localhost:3000/api/admin/logout`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+      },
+    });
+    if (response.status == 401) {
+      logout();
+      navigate("/admin/login");
+    }
+    localStorage.clear();
     logout();
     navigate("/admin/login");
     toast.success("Logged out successfully!");
@@ -155,7 +211,15 @@ export default function AdminHome() {
     if (!confirmDelete) return;
     try {
       const loadingToast = toast.loading("Deleting book...");
-      await axios.delete(`http://localhost:3000/api/books/book/${id}`);
+      await axiosInstance.delete(`http://localhost:3000/api/books/book/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+        },
+      });
+      if (response.status == 401) {
+        logout();
+        navigate("/admin/login");
+      }
       toast.dismiss(loadingToast);
 
       toast.success("Book deleted successfully!");
@@ -208,11 +272,19 @@ export default function AdminHome() {
     if (!confirmDelete) return;
     try {
       const loadingToast = toast.loading("Deleting Admin...");
-      await axios.delete(`http://localhost:3000/api/admin/delete-admin/${id}`);
+      await axiosInstance.delete(`http://localhost:3000/api/admin/delete-admin/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+        },
+      });
+      if (response.status == 401) {
+        logout();
+        navigate("/admin/login");
+      }
       toast.dismiss(loadingToast);
 
       toast.success("Admin deleted successfully!");
-      getAllAdmins()
+      getAllAdmins();
     } catch (error) {
       toast.dismiss();
       toast.error("Failed to delete the Admin!");
@@ -221,8 +293,8 @@ export default function AdminHome() {
   };
 
   useEffect(() => {
-    getAllBooks();
     getAllOrders();
+    getAllBooks();
   }, []);
 
   useEffect(() => {
@@ -460,10 +532,14 @@ export default function AdminHome() {
                       <td>{admin.admin_id}</td>
                       <td>{admin.username}</td>
                       <td>{admin.email}</td>
-                      <td>{admin.created_at}</td>
+                      <td>
+                      <FormatDateTime isoDate={admin.created_at}/> 
+                      </td>
                       <td>
                         <button
-                          onClick={() => deleteAdmin(admin.admin_id, admin.username)}
+                          onClick={() =>
+                            deleteAdmin(admin.admin_id, admin.username)
+                          }
                           className="m-auto flex justify-center items-center w-[60px] h-[35px] rounded-[3px] bg-[#ff2c2c] text-[15px] border-[1px] border-[#cdcdcd]"
                         >
                           Delete
