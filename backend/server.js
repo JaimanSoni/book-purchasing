@@ -28,7 +28,7 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 app.use(cors({
   origin: function(origin, callback) {
-    const allowedOrigins = ['http://localhost:5173', 'http://192.168.98.20:5173'];
+    const allowedOrigins = ['http://localhost:5173', 'http://192.168.98.20:5173', 'http://192.168.75.20:5173'];
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {

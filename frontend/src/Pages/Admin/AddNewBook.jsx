@@ -92,7 +92,7 @@ export default function AddNewBook() {
         setPrice("");
         setStock("");
         navigate("/admin/dashboard")
-        fileInputRef.current.value = null; // Reset file input
+        posterInputRef.current.value = null;
       } else {
         toast.error("Failed to add book. Please try again.");
       }

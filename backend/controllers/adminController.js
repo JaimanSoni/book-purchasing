@@ -51,7 +51,7 @@ const adminController = {
 
   async register(req, res) {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password } = req.body;      
       const existingUser = await Admin.findOne({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
@@ -61,10 +61,13 @@ const adminController = {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       const newUser = await Admin.create({ username, email, password: hashedPassword });
-
+      console.log(newUser);
+      
       return res.status(201).json({ success:true, message: 'User registered successfully', user: newUser });
     } catch (error) {
       console.error(error);
+      console.error("Error details:", error); // Log detailed error info
+        
       return res.status(500).json({ success:false , message: 'Server error, please try again later' });
     }
   },

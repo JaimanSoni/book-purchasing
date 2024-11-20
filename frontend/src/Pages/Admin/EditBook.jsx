@@ -3,9 +3,12 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import axiosInstance from "../../../utils/axiosInstance";
 import { toast, Toaster } from "react-hot-toast";
+import {useNavigate} from "react-router-dom";
 
 export default function AddNewBook() {
   const { id } = useParams();
+
+  const navigate = useNavigate()
 
   // State Variables
   const [bookID, setBookID] = useState(null);
@@ -93,6 +96,7 @@ export default function AddNewBook() {
       }
       if (response.data.success) {
         toast.success("Book updated successfully!");
+        navigate("/admin/dashboard")
       } else {
         toast.error("Failed to update book. Please try again.");
       }
@@ -153,7 +157,7 @@ export default function AddNewBook() {
       <div className="w-[80%] bg-white px-[20px] py-[25px] shadow-md h-fit min-h-[400px] rounded-[15px]">
         <Toaster position="top-center" />
         <div className="flex justify-between items-center">
-          <h1 className="text-[27px] font-medium">Add New Book</h1>
+          <h1 className="text-[27px] font-medium">Edit Book</h1>
           <a
             href="/admin/dashboard"
             className="w-[60px] h-[35px] bg-black flex justify-center items-center text-white rounded-[5px]"

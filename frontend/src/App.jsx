@@ -9,6 +9,9 @@ import AdminSignup from "./Pages/Admin/AdminSignup";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import OrderDetails from "./Pages/Admin/OrderDetails"
 import EditBook from "./Pages/Admin/EditBook"
+import PaymentSuccess from "./PaymentPages/PaymentSuccess"
+import PaymentFailure from "./PaymentPages/PaymentFailure"
+import PaymentCanceled from "./PaymentPages/PaymentCanceled"
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -48,6 +51,9 @@ const App = () => {
         <Routes>
           {/* User Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/canceled" element={<PaymentCanceled />} />
+          <Route path="/payment/failure" element={<PaymentFailure />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLogin />} />
 

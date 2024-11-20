@@ -216,10 +216,6 @@ export default function AdminHome() {
           Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
         },
       });
-      if (response.status == 401) {
-        logout();
-        navigate("/admin/login");
-      }
       toast.dismiss(loadingToast);
 
       toast.success("Book deleted successfully!");
@@ -277,10 +273,10 @@ export default function AdminHome() {
           Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
         },
       });
-      if (response.status == 401) {
-        logout();
-        navigate("/admin/login");
-      }
+      // if (response.status == 401) {
+      //   logout();
+      //   navigate("/admin/login");
+      // }
       toast.dismiss(loadingToast);
 
       toast.success("Admin deleted successfully!");
