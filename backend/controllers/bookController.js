@@ -28,7 +28,7 @@ const addBook = async (req, res) => {
 
     const newBook = await Book.create({
       title,
-      price: parseFloat(price),
+      price: parseInt(price),
       stock: parseInt(stock),
       image_url: images, 
     });
@@ -50,9 +50,19 @@ const addBook = async (req, res) => {
 const getBooks = async (req, res) => {
   try {
     const books = await Book.findAll();
+
+    // Process books to extract only the 'url' from 'image_url'
+    const processedBooks = books.map(book => {
+      const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; // Parse JSON and extract the first URL
+      return {
+        ...book.toJSON(), // Convert Sequelize model instance to plain object
+        image_url: imageUrl, // Replace 'image_url' with the extracted URL
+      };
+    });
+
     return res.status(200).json({
       success: true,
-      books,
+      books: processedBooks,
     });
   } catch (error) {
     console.error("Error in getBooks:", error);
@@ -63,12 +73,14 @@ const getBooks = async (req, res) => {
     });
   }
 };
-const updateBook = async (req, res) => {
-  try {
-    const { id } = req.params; 
-    const { title, price, stock } = req.body;
 
+const getSingleBook = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the book by its ID
     const book = await Book.findByPk(id);
+
     if (!book) {
       return res.status(404).json({
         success: false,
@@ -76,26 +88,60 @@ const updateBook = async (req, res) => {
       });
     }
 
-    book.title = title || book.title;
-    book.price = price || book.price;
-    if (stock !== undefined) book.stock = stock; 
-
-    await book.save();
+    // Process the book to extract only the 'url' from 'image_url'
+    const imageUrl = JSON.parse(book.image_url)?.[0]?.url || null; // Parse JSON and extract the URL
+    const processedBook = {
+      ...book.toJSON(),
+      image_url: imageUrl, // Replace 'image_url' with the extracted URL
+    };
 
     return res.status(200).json({
       success: true,
-      message: "Book updated successfully",
-      book,
+      book: processedBook,
     });
   } catch (error) {
-    console.error("Error in updateBook:", error);
+    console.error("Error in getSingleBook:", error);
     return res.status(500).json({
       success: false,
-      message: "Error updating book",
+      message: "Error fetching book",
       error: error.message,
     });
   }
 };
+
+// const updateBook = async (req, res) => {
+//   try {
+//     const { id } = req.params; 
+//     const { title, price, stock } = req.body;
+    
+
+//     const book = await Book.findByPk(id);
+//     if (!book) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Book not found",
+//       });
+//     }
+
+//     book.title = title || book.title;
+//     book.price = price || book.price;
+//     if (stock !== undefined) book.stock = stock; 
+
+//     await book.save();    
+//     return res.status(200).json({
+//       success: true,
+//       message: "Book updated successfully",
+//       book,
+//     });
+//   } catch (error) {
+//     console.error("Error in updateBook:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Error updating book",
+//       error: error.message,
+//     });
+//   }
+// };
 const deleteBook = async (req, res) => {
   try {
     const { id } = req.params; 
@@ -159,64 +205,137 @@ const deletePhoto = async (req, res) => {
     });
   }
 };
-const addPhoto = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const book = await Book.findByPk(id);
+// const addPhoto = async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const book = await Book.findByPk(id);
   
-      if (!book) {
-        return res.status(404).json({ message: "Book not found" });
-      }
+//       if (!book) {
+//         return res.status(404).json({ message: "Book not found" });
+//       }
   
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: "No image uploaded" });
-      }
+//       if (!req.files || req.files.length === 0) {
+//         return res.status(400).json({ message: "No image uploaded" });
+//       }
   
-      const file = req.files[0]; 
+//       const file = req.files[0]; 
+//       console.log(file);
+      
+//       const uploadResponse = await cloudinary.uploader.upload(file.path, {
+//         folder: "books/",
+//         use_filename: true,
+//         unique_filename: true,
+//       });
+  
+//       const newImage = {
+//         url: uploadResponse.secure_url,
+//         public_id: uploadResponse.public_id,
+//       };
+  
+//       book.image_url = [newImage];
+  
+//       await book.update({
+//         image_url: book.image_url,
+//         updated_at: new Date()
+//       });
+  
+//       if (file.path) {
+//         fs.unlink(file.path, (err) => {
+//           if (err) console.error('Error deleting temporary file:', err);
+//         });
+//       }
+  
+//       return res.status(200).json({
+//         success: true,
+//         message: "Photo added successfully",
+//         image: newImage 
+//       });
+  
+//     } catch (error) {
+//       console.error("Error in addPhoto:", error);
+//       return res.status(500).json({
+//         success: false,
+//         message: "Error adding photo",
+//         error: error.message,
+//       });
+//     }
+// };
+const updateBookWithPhoto = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { title, price, stock } = req.body;
+
+    // Find the book by its ID
+    const book = await Book.findByPk(id);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    // Update book details if provided in the request body
+    book.title = title || book.title;
+    book.price = price || book.price;
+    if (stock !== undefined) book.stock = stock;
+
+    // Handle photo upload if a file is provided
+    if (req.files && req.files.length > 0) {
+      const file = req.files[0];
+
+      // Upload the photo to Cloudinary
       const uploadResponse = await cloudinary.uploader.upload(file.path, {
         folder: "books/",
         use_filename: true,
         unique_filename: true,
       });
-  
+
       const newImage = {
         url: uploadResponse.secure_url,
         public_id: uploadResponse.public_id,
       };
-  
+
+      // Update the book's image URL field
       book.image_url = [newImage];
-  
-      await book.update({
-        image_url: book.image_url,
-        updated_at: new Date()
-      });
-  
+
+      // Delete the temporary file
       if (file.path) {
         fs.unlink(file.path, (err) => {
-          if (err) console.error('Error deleting temporary file:', err);
+          if (err) console.error("Error deleting temporary file:", err);
         });
       }
-  
-      return res.status(200).json({
-        success: true,
-        message: "Photo added successfully",
-        image: newImage 
-      });
-  
-    } catch (error) {
-      console.error("Error in addPhoto:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Error adding photo",
-        error: error.message,
-      });
     }
+
+    // Save the updated book details
+    await book.update({
+      image_url: book.image_url, // Only updates if photo was uploaded
+      title: book.title,
+      price: book.price,
+      stock: book.stock,
+      updated_at: new Date(),
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Book updated successfully",
+      book,
+      image: req.files && req.files.length > 0 ? book.image_url : undefined,
+    });
+  } catch (error) {
+    console.error("Error in updateBookWithPhoto:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error updating book",
+      error: error.message,
+    });
+  }
 };
+
 module.exports = {
   addBook,
   getBooks,
   deleteBook,
-  updateBook,
+  updateBookWithPhoto,
   deletePhoto,
-  addPhoto
+  getSingleBook
 };

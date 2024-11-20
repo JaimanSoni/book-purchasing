@@ -6,7 +6,11 @@ const authenticate = require('../middlewares/authMiddleware');
 
 router.post('/login', adminController.login);
 
-router.post('/register', authenticate, adminController.register);
+router.post('/register', adminController.register);
+router.get('/all-admin', adminController.getAllAdmin);
+router.delete('/delete-admin/:id', adminController.deleteAdmin);
 router.get('/orders', adminController.getAllOrders);
+router.post('/refresh-token', adminController.refreshAccessToken);
+
 
 module.exports = router;

@@ -8,6 +8,7 @@ import AddNewBook from "./Pages/Admin/AddNewBook";
 import AdminSignup from "./Pages/Admin/AdminSignup";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import OrderDetails from "./Pages/Admin/OrderDetails"
+import EditBook from "./Pages/Admin/EditBook"
 
 const App = () => {
   const [cart, setCart] = useState([]);
@@ -80,6 +81,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <OrderDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/edit-book/:id"
+            element={
+              <ProtectedRoute>
+                <EditBook />
               </ProtectedRoute>
             }
           />

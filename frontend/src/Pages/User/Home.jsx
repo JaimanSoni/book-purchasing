@@ -7,18 +7,21 @@ import BookStore from "./UserPage";
 export default function Home() {
   const [cart, setCart] = useState([]);
 
-  const addToCart = (book) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === book.id);
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === book.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevCart, { ...book, quantity: 1 }];
-    });
-    toast.success("Added to cart");
-  };
+ const addToCart = (book) => {     
+  // console.log('Adding book to cart:', book);      
+  setCart((prevCart) => {       
+    const existingItem = prevCart.find((item) => item.book_id === book.book_id);       
+    if (existingItem) {         
+      return prevCart.map((item) =>           
+        item.book_id === book.book_id 
+          ? { ...item, quantity: item.quantity + 1 } 
+          : item         
+      );       
+    }       
+    return [...prevCart, { ...book, quantity: 1 }];     
+  });     
+  toast.success("Added to cart");   
+};
 
   const removeFromCart = (id) => {
     setCart((prevCart) => {

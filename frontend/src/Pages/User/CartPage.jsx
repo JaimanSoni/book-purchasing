@@ -67,7 +67,7 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
             total_price: total,
           },
           items: cartItems.map((item) => ({
-            book_id: item.id,
+            book_id: item.book_id,
             quantity: item.quantity,
             price: item.price,
           })),
@@ -130,12 +130,12 @@ const CartPage = ({ cart, removeFromCart, clearCart }) => {
             </thead>
             <tbody>
               {cartItems.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.book_id}>
                   <td className="p-3 border-b">{item.title}</td>
-                  <td className="p-3 border-b">₹{item.price.toFixed(2)}</td>
+                  <td className="p-3 border-b">₹{item.price}</td>
                   <td className="p-3 border-b">{item.quantity}</td>
                   <td className="p-3 border-b">
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity)}
                   </td>
                   <td className="p-3 border-b">
                     <button

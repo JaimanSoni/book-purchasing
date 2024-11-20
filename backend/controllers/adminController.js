@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/Admin');
-const { generateTokens } = require('../utils/tokenManager');
+const jwt = require("jsonwebtoken");
+const {createAccessToken, createRefreshToken} =  require('../utils/tokenManager')
 const { Order, OrderItem, User, Book } = require('../models');
 const adminController = {
   async login(req, res) {
@@ -19,10 +20,11 @@ const adminController = {
 
       const payload = {
         admin_id: admin.admin_id,
-        username: admin.username
       };
 
-      const { accessToken, refreshToken } = generateTokens(payload);
+      // const { accessToken, refreshToken } = generateTokens(payload);
+      const accessToken = createAccessToken({ payload});
+      const refreshToken = createRefreshToken({ payload });
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -49,7 +51,6 @@ const adminController = {
   async register(req, res) {
     try {
       const { username, email, password } = req.body;
-
       const existingUser = await Admin.findOne({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
@@ -60,10 +61,10 @@ const adminController = {
 
       const newUser = await Admin.create({ username, email, password: hashedPassword });
 
-      return res.status(201).json({ message: 'User registered successfully', user: newUser });
+      return res.status(201).json({ success:true, message: 'User registered successfully', user: newUser });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Server error, please try again later' });
+      return res.status(500).json({ success:false , message: 'Server error, please try again later' });
     }
   },
   
@@ -72,51 +73,6 @@ const adminController = {
     res.json({ message: 'Logout successful' });
   },
   
-  // async getAllOrders(req, res) {
-  //   try {      
-  //     const orders = await Order.findAll({
-  //       include: [
-  //         {
-  //           model: User,
-  //           attributes: ['username', 'enrollment_number'],
-  //         },
-  //         {
-  //           model: OrderItem,
-  //           include: {
-  //             model: Book,
-  //             attributes: ['title'],
-  //           },
-  //         },
-  //       ],
-  //       attributes: {
-  //         include: ['ordered_at']
-  //       },
-  //     });
-      
-  //     const orderDetails = orders.map(order => {
-  //       const user = order.User;
-  //       const items = order.OrderItems;
-
-  //       return {
-  //         order_id: order.order_id,
-  //         total_price: order.total_price,
-  //         name: user.username,
-          
-  //         enrollment_number: user.enrollment_number,
-  //         items: items.map(item => ({
-  //           book_title: item.Book.title,
-  //           quantity: item.quantity,
-  //           price_per_item: item.price,
-  //         })),
-  //       };
-  //     });
-
-  //     res.status(200).json({ orders: orderDetails });
-  //   } catch (err) {
-  //     console.error('Error fetching orders:', err);
-  //     res.status(500).json({ message: 'Server error while fetching orders' });
-  //   }
-  // },
   async getAllOrders(req, res) {
     try {
       const orders = await Order.findAll({
@@ -174,7 +130,92 @@ const adminController = {
         error: error.message
       });
     }
-  }
+  },
+
+  async refreshAccessToken(req, res) {
+    const refreshtoken = req.cookies.refreshtoken;
+  
+    if (!refreshtoken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+  
+    jwt.verify(
+      refreshtoken,
+      process.env.JWT_REFRESH_SECRET,
+      (err, decoded) => {
+        if (err) {
+          if (err.name === "TokenExpiredError") {
+            return res.status(403).json({ message: "Refresh token expired, please log in again" });
+          }
+          return res.status(401).json({ message: "Invalid refresh token" });
+        }
+  
+        // If valid, create a new access token
+        const accessToken = createAccessToken({ id: decoded.id });
+        res.status(200).json({ accessToken });
+      }
+    );
+  },
+  
+  async getAllAdmin(req, res) {
+    try {
+      // Fetch all admin records from the database
+      const admins = await Admin.findAll({
+        attributes: ['admin_id', 'username', 'email', 'created_at'], // Include only these fields
+      });
+
+      return res.status(200).json({
+        success: true,
+        admins,
+      });
+    } catch (error) {
+      console.error("Error fetching admins:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch admins",
+        error: error.message,
+      });
+    }
+  },
+  async deleteAdmin(req, res) {
+    try {
+      const { id } = req.params; // Extract admin ID from the URL parameters
+
+      // Check if id is provided
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "Admin ID is required to delete an admin",
+        });
+      }
+
+      // Find the admin by ID
+      const admin = await Admin.findByPk(id);
+
+      if (!admin) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      // Delete the admin
+      await admin.destroy();
+
+      return res.status(200).json({
+        success: true,
+        message: `Admin with ID ${id} has been deleted successfully`,
+      });
+    } catch (error) {
+      console.error("Error deleting admin:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete admin",
+        error: error.message,
+      });
+    }
+  },
+  
 };
 
 
