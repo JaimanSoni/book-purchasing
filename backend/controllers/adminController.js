@@ -61,7 +61,6 @@ const adminController = {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       const newUser = await Admin.create({ username, email, password: hashedPassword });
-      console.log(newUser);
       
       return res.status(201).json({ success:true, message: 'User registered successfully', user: newUser });
     } catch (error) {
@@ -154,7 +153,6 @@ const adminController = {
   },
 
   async refreshAccessToken(req, res) {
-    console.log("Refresh token received:", req.cookies.refreshToken);
     const refreshtoken = req.cookies.refreshtoken;
     
   
